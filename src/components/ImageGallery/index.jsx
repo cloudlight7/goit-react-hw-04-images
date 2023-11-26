@@ -8,7 +8,6 @@ const ImageGallery = ({ images, onOpenModal }) => {
     
     return <List>
         {images.map(image => {
-        //console.log(images.id);
 		return (
         <ImageGalleryItem key={image.id} image={image} onOpenModal={onOpenModal} />
         )

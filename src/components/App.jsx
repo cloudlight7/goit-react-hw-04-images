@@ -1,5 +1,5 @@
 
-import { Component } from 'react';
+import { useState} from 'react';
 import Searchbar from './Searchbar'
 import ImageGallery from './ImageGallery'
 import Button from './Button'
@@ -7,84 +7,80 @@ import Modal from './Modal'
 import { getPictures } from './services/api'
 import Loader from './Loader'
 import {Box} from './AppStyle.module'
+import { useEffect } from 'react';
 
-export class App extends Component {
-  state = {
-    value:'',
-    modal: false,
-    loading: false,
-    images: [],
-    page: 1,
-    error: '',
-    loadMore: '',
-    modalImage:'',
 
+
+export const App = () => {
+  const [value, setValue] = useState('')
+  const [modal, setModal] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [images, setImages] = useState([])
+  const [page, setPage] = useState(1)
+  const [error, setError] = useState('')
+  const [loadMore, setLoadMore] = useState('')
+  const [modalImage, setModalImage] = useState('')
+
+  const hendleFormSubmit = ({ values }) => {
+    setPage(1)
+    setValue(values)
   }
-   hendleFormSubmit = ({values})=>{
-      this.setState({ value: values, page: 1  })
+const openImage = (eve) => {
+      const searchImg = images.find(option => option.id === eve);
+      setModalImage(searchImg.largeImageURL)
+    setModal(true)
+   
   }
-  openImage = (eve) => {
-
-    if (eve !== 'Escape') {
-      const searchImg = this.state.images.find(option => option.id === eve);
-      this.setState({ modalImage: searchImg.largeImageURL })
+  const closeImage = () =>{
+    setModal(false)
     }
-    
-    this.setState(({ modal }) => ({
-      modal: !modal
-    }));
-  }
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.value !== this.state.value || this.state.page !== prevState.page) {
-      if (prevState.value !== this.state.value) {
-        this.setState({ images: '', })
-      }
-      this.handleImages()
-    }
-  }
-  handleImages = async () => {
-		try {
-      this.setState({ loading: true, loadMore:false })
-      const data = await getPictures(this.state.value, this.state.page)
-      this.setState((prev) => ({
-        loading: false,
-        images: [...prev.images, ...data.hits],
-        loadMore: this.state.page < Math.ceil(data.totalHits / 12 )
-    }))
-    } catch (error) {
-      console.log(error.message);
-			this.setState({ error: error.message, loading: true, loadMore:false })
-      }
-    finally {
-
-      }
-  }
-  changePage = () => {
-    this.setState((prevState) => { 
-      return {
-        page: prevState.page + 1,
-      };
+  useEffect(() => {
+  if(value){
+  const handleImages = async () => {
+  try {
+    setLoading(true)
+    setLoadMore(false)
+    const data = await getPictures(value, page)
+    setImages((prev) => {
+        return [...prev, ...data.hits]
     })
+    setLoadMore(page < Math.ceil(data.totalHits / 12 ))
+  } catch (error) {
+    setLoading(true)
+    setError(error.message)
+    setLoadMore(false)
+		 }
+    finally {
+      setLoading(false)
+      }
   }
-
-  render() {
-    const { modal, images,loading, loadMore, modalImage,error } = this.state;
-    return (
-      <>
-        {modal && <Modal onCloseModal={this.openImage}>
+    handleImages()
+    }
+}, [value, page])
+  useEffect(() => {
+setImages('')
+  }, [value])
+  const changePage = () => {
+   setPage((prevState) => {
+          return prevState + 1
+        })
+  }
+  return (
+    <>
+        {modal && <Modal onCloseModal={closeImage}>
           <div >
 			<img src={modalImage} width={'100%'} height={'100%'}  alt='...' />
 			
 		</div></Modal>
         }
-        <Searchbar onSubmit={this.hendleFormSubmit} isSubmitting={loading} />
-        {images && <ImageGallery images={images} onOpenModal={this.openImage}/>}
+        <Searchbar onSubmit={hendleFormSubmit} isSubmitting={loading} />
+        {images && <ImageGallery images={images} onOpenModal={openImage}/>}
         <Box>
           {error && <h1>{error}</h1>}
         {loading && <Loader/>}
-          {loadMore && <Button onClickLoadMore={this.changePage} />}
+          {loadMore && <Button onClickLoadMore={changePage} />}
           </Box>
       </>
-  );
-  };
-  };
+  )
+}
+

@@ -1,33 +1,36 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {Owerlay, ModalBox} from './ModalStyle.module';
 
 const modalRoot = document.querySelector('#modal-root')
-export default class Modal extends Component{
-    componentDidMount() {
-        window.addEventListener('keydown', this.hendleKeyDown)
-    }
-    componentWillUnmount() {
-        window.removeEventListener('keydown', this.hendleKeyDown)
-        }
 
-    hendleKeyDown = eve => {
+ const Modal = ({children, onCloseModal}) => {
+
+    useEffect(() => {
+       window.addEventListener('keydown', hendleKeyDown)
+    
+      return () => {
+        window.removeEventListener('keydown', hendleKeyDown)
+      }
+    }, [])
+    
+
+   const hendleKeyDown = eve => {
                 if (eve.code === 'Escape') {
-                    this.props.onCloseModal(eve.code);
+                    onCloseModal();
                 }
             }
-    hendleBackDrop = event => {
+   const hendleBackDrop = event => {
                 if (event.currentTarget === event.target) {
-                    this.props.onCloseModal('Escape');
+                    onCloseModal();
         }
     }
-    
-render(){
-    return createPortal(
-        <Owerlay onClick={this.hendleBackDrop} >
+  return createPortal(
+        <Owerlay onClick={hendleBackDrop} >
             <ModalBox >
-                {this.props.children}
+                {children}
   </ModalBox>
 </Owerlay>, modalRoot)
 }
-    }
+
+export default Modal
