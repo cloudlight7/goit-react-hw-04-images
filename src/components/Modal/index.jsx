@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {Owerlay, ModalBox} from './ModalStyle.module';
@@ -8,7 +9,7 @@ const modalRoot = document.querySelector('#modal-root')
 
     useEffect(() => {
        window.addEventListener('keydown', hendleKeyDown)
-    
+
       return () => {
         window.removeEventListener('keydown', hendleKeyDown)
       }
