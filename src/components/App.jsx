@@ -22,6 +22,7 @@ export const App = () => {
   const [modalImage, setModalImage] = useState('')
 
   const hendleFormSubmit = ({ values }) => {
+    setImages('')
     setPage(1)
     setValue(values)
   }
@@ -56,10 +57,8 @@ const openImage = (eve) => {
   }
     handleImages()
     }
-}, [value, page])
-  useEffect(() => {
-setImages('')
-  }, [value])
+  }, [value, page])
+
   const changePage = () => {
    setPage((prevState) => {
           return prevState + 1
